@@ -18,7 +18,7 @@ class Url_Id_Consumer(threading.Thread):
 		print "Exiting " + self.threadID
 
 
-	#Put the new TFBS in the 
+	#Put the new TFBS in the ex_Q through exploring genes children in t_Q
 	def process_genes(threadName, t_Q, ex_Q):
 		while not exitFlag_Consumers: 
 			if not t_Q.empty():
@@ -29,36 +29,37 @@ class Url_Id_Consumer(threading.Thread):
 			else:
 				time.sleep(1)
 
-
-#falta poner el factor descriminador de quien es el valor mas grande de todos los valores que faltan por agregar
+    #search the genes in the xml pages of fantom db edge expression through http request 
 	def extract_data(id_gene, ex_Q):
 		req = urllib2.Request('http://fantom.gsc.riken.jp/4/edgeexpress/cgi/edgeexpress.fcgi?id='+id_gene)
-    response = urllib2.urlopen(req)
-    the_page = response.read()
-		tree = etree.XML(the_page)
-		#call the extract methods
-		extract_input_promoters(tree, ex_Q)
-		extract_out_promoters(tree, ex_Q)
+        response = urllib2.urlopen(req)
+        the_page = response.read()
+	    tree = etree.XML(the_page)
+	    #call the extract methods
+	    extract_input_promoters(tree, ex_Q,id_gene)
+	    extract_out_promoters(tree, ex_Q,id_gene)
 		
 
-	#falta poner atributo si es de entrada o salida ya que se requiere ver en que dirección va la arista con un numero en la tupla 
-	def extract_input_promoters(tree, ex_Q):
+	#extract promoters of the next gene in the queue
+	def extract_input_promoters(tree, ex_Q,id_gene):
 		#INPUT PROMOTERS_FROM_EDGE
 		print "promoter_from_edges"
-    input_pro = tree.findall('promoters/promoter_from_edges')
-    for i in input_pro:
-			id_gene = i.findall('link_from')
-			for g in id_gene:	
-				ex_Q.put((g.attrib['feature_id'],g.attrib['name'],g.attrib['weight']))
-				print "en cola: " + g.attrib['feature_id'] +' '+ g.attrib['name'] +' '+ g.attrib['weight']
+        input_pro = tree.findall('promoters/promoter_from_edges')
+        for i in input_pro:
+            id_gene = i.findall('link_from')
+            for g in id_gene:	
+		        ex_Q.put((g.attrib['feature_id'],g.attrib['name'],g.attrib['weight'],id_gene,'0'))
+				print "en cola: " + g.attrib['feature_id'] +' '+ g.attrib['name'] +' '+ g.attrib['weight'] + ' ' + '0'
 
-	def extract_out_promoters(tree, ex_Q):
+    
+    #extract targets of the next gene in the queue
+	def extract_out_promoters(tree, ex_Q,id_gene):
 		#OUTPUT PROMOTERS_TO_EDGE
 		print "\n\npromoter_to_edges"
-    output_pro = tree.findall('tfbs_predictions/link_to')
-    for o in output_pro:
-			ex_Q.put((o.attrib['feature_id'],o.attrib['name'],o.attrib['weight']))
-			print "en cola: " + o.attrib['feature_id'] +' '+ o.attrib['name'] +' '+ o.attrib['weight']
+        output_pro = tree.findall('tfbs_predictions/link_to')
+        for o in output_pro:
+	        ex_Q.put((o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_gene,'1'))
+			print "en cola: " + o.attrib['feature_id'] +' '+ o.attrib['name'] +' '+ o.attrib['weight'] + ' ' + '1'
 
 
 ########################END CLASS Url_Id_Consumer########################

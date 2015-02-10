@@ -7,7 +7,7 @@ def main():
 	#name of threads
 	threadList = []
 	#max number of threads
-	MAX_NUM_T = 50
+	MAX_NUM_T = 27
 	#queue of new TFBS to explore
 	TFBSQ = Queue.Queue()
 	#queue of explored TFBS with interactions and weights
@@ -16,7 +16,7 @@ def main():
     exitFlag = 0 
     #exit flag for consumers
     exitFlag_Consumers = 0  
-
+    #a gene for begin to explore
     TFBSQ.append('5558263')
 
 	#enum the consumerthreads
@@ -34,12 +34,11 @@ def main():
     #create Db_Controller thread
 	db_thread = Db_Controller("Db_thread", TFBS, X_TFBS, exitFlag)    
 
-  	#cambiar la condicion de paro creo qeu va en el proceso de db_controller
-	#while not TFBS.empty():
+	#while not TFBS.empty() and EXP_TFBS.empty():
     while not exitFlag:
-	pass#
+	pass
 
-	exitFlag_Consumers = 1#
+	exitFlag_Consumers = 1
 
 	#Wait for all threads to complete
 	for t in threads:#
