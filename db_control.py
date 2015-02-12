@@ -2,25 +2,26 @@ import threading
 import sqlite3
 
 class Db_Controller(threading.Thread):
-	def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag):
-		threading.Thread.__init__(self)
-		self.threadID = threadID
-		self.TFBSQ = TFBSQ
-		self.EXP_TFBSQ = EXP_TFBSQ
-		self.con= set_con_db()
-		self.cursor = conection.cursor()
+	
+    def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.TFBSQ = TFBSQ
+        self.EXP_TFBSQ = EXP_TFBSQ
+        self.con= set_con_db()
+        self.cursor = conection.cursor()
         self.exit_flag = exitFlag
         self.exp_genes = []
         
 
-	def run(self):
-		print "Starting " + self.name
-		process_data()
-		print "Exiting " + self.name
+    def run(self):
+        print "Starting " + self.name
+        process_data()
+        print "Exiting " + self.name
 
     #Set a connection with the db
-	def set_con_db():
-		#return sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
+    def set_con_db():
+        #return sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
         return sqlite3.connect('/Users/daniel/Desktop/trabajo/fantomine/db/genes.db')
     
     #Create the tables in the db, if they exists, then drop them
@@ -41,10 +42,10 @@ class Db_Controller(threading.Thread):
         self.con.commit()
                 
     #Control data flow between the queues and the db
-	def process_data():
+    def process_data():
         #first create tables 
-        create_tables()	
-		while not self.exitFlag:
+        create_tables()
+        while not self.exitFlag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
                 add_TFBS2DB()
@@ -69,7 +70,7 @@ class Db_Controller(threading.Thread):
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
                 g_w = gene_raw[2]
-                update_weight(g_w,gene1_q,gene2_q):
+                update_weight(g_w,gene1_q,gene2_q)
                 
 
     #Make a query for the id in db with the gene name
@@ -79,14 +80,14 @@ class Db_Controller(threading.Thread):
         self.cursor.execute(query, att)
         data=cursor.fetchone()
         if data is None:
-	        print('There is no component named %s'%gene)
+            print('There is no component named %s'%gene)
             return 0
         else:
-	        print('Component %s found with rowid %s'%(gene,data[0]))
+            print('Component %s found with rowid %s'%(gene,data[0]))
             return data[0]
 
     #Add a the new genes and interactions to db
-	def add_row(gene,q1,q2):
+    def add_row(gene,q1,q2):
         gene_id = gene[0]
         gene_sym = gene[1]
         gene_w = gene[2]
@@ -123,7 +124,7 @@ class Db_Controller(threading.Thread):
 
 
 	#Update the weight of an interaction
-	def update_row(id_row, weight):
+    def update_row(id_row, weight):
         att = (weight, id_gene)
         update = "UPDATE GENES_INTER SET WEIGHT = ? WHERE ID = ?;"
         self.cursor.execute(update, att)
