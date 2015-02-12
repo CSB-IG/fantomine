@@ -27,6 +27,7 @@ class Url_Id_Consumer(threading.Thread):
 				#calling crawler
 				extract_data(id_gene, ex_Q)
 			else:
+                print "thread " + threadName
 				time.sleep(1)
 
     #search the genes in the xml pages of fantom db edge expression through http request 
@@ -47,9 +48,10 @@ class Url_Id_Consumer(threading.Thread):
         input_pro = tree.findall('promoters/promoter_from_edges')
         for i in input_pro:
             id_gene = i.findall('link_from')
-            for g in id_gene:	
-		        ex_Q.put((g.attrib['feature_id'],g.attrib['name'],g.attrib['weight'],id_gene,'0'))
-				print "en cola: " + g.attrib['feature_id'] +' '+ g.attrib['name'] +' '+ g.attrib['weight'] + ' ' + '0'
+            for g in id_gene:
+                tup1 = (g.attrib['feature_id'],g.attrib['name'],g.attrib['weight'],id_gene,'0')
+		        ex_Q.put(tup1)
+				print "en cola: " + tup1
 
     
     #extract targets of the next gene in the queue
@@ -58,8 +60,9 @@ class Url_Id_Consumer(threading.Thread):
 		print "\n\npromoter_to_edges"
         output_pro = tree.findall('tfbs_predictions/link_to')
         for o in output_pro:
-	        ex_Q.put((o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_gene,'1'))
-			print "en cola: " + o.attrib['feature_id'] +' '+ o.attrib['name'] +' '+ o.attrib['weight'] + ' ' + '1'
+            tup2 = (o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_gene,'1')
+	        ex_Q.put(tup2)
+			print "en cola: " + tup2
 
 
 ########################END CLASS Url_Id_Consumer########################
