@@ -47,6 +47,7 @@ def main():
     print "Exiting Main Thread, DATA MINING COMPLETE jeje"
     	
 
+# cave canem
 if __name__ == '__main__':
     main()
 
