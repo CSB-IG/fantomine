@@ -5,27 +5,28 @@ import threading
 
 class Url_Id_Consumer(threading.Thread):
     
-    def __init__(self, threadID, TFBSQ, EXP_TFBSQ):
+    def __init__(self, threadID, TFBSQ, EXP_TFBSQ,exitFlag_Consumers):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.TFBSQ = TFBSQ
         self.EXP_TFBSQ = EXP_TFBSQ
+        self.exitFlag = exitFlag_Consumers 
 
 
     def run(self):
         print "Starting " + self.threadID
-        process_gene(self.threadID, self.TFBSQ, self.EXP_TFBSQ)
+        self.process_genes(self.threadID, self.TFBSQ, self.EXP_TFBSQ)
         print "Exiting " + self.threadID
 
 
     #Put the new TFBS in the ex_Q through exploring genes children in t_Q
-    def process_genes(threadName, t_Q, ex_Q):
-        while not exitFlag_Consumers: 
+    def process_genes(self,threadName, t_Q, ex_Q):
+        while not self.exitFlag: 
             if not t_Q.empty():
                 id_gene = t_Q.get()
                 print "%s processing %s" % (threadName, id_gene) 
                 #calling crawler
-                extract_data(id_gene, ex_Q)
+                self.extract_data(id_gene, ex_Q)
             else:
                 print "thread " + threadName
                 time.sleep(1)
@@ -37,8 +38,8 @@ class Url_Id_Consumer(threading.Thread):
         the_page = response.read()
         tree = etree.XML(the_page)
 	    #call the extract methods
-        extract_input_promoters(tree, ex_Q,id_gene)
-        extract_out_promoters(tree, ex_Q,id_gene)
+        self.extract_input_promoters(tree, ex_Q,id_gene)
+        self.extract_out_promoters(tree, ex_Q,id_gene)
 		
 
 	#extract promoters of the next gene in the queue

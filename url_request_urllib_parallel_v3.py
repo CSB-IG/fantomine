@@ -6,6 +6,8 @@ def main():
 
     #name of threads
     threadList = []
+    #list of consumers threads
+    threads = []
     #max number of threads
     MAX_NUM_T = 27
     #queue of new TFBS to explore
@@ -25,13 +27,13 @@ def main():
     print "all threads enum" 
 
     #create Url_Id_Consumer threads
-    for j in range(MAX_NUM_T):
-        thread = Url_Id_Consumer(threadID, TFBS, EXP_TFBSQ, exitFlag_Consumers)
+    for name in threadList:
+        thread = Url_Id_Consumer(name, TFBSQ, EXP_TFBSQ, exitFlag_Consumers)
         thread.start()
         threads.append(thread)
 
     #create Db_Controller thread
-    db_thread = Db_Controller("Db_thread", TFBS, X_TFBS, exitFlag)    
+    db_thread = Db_Controller("Db_thread", TFBSQ, EXP_TFBSQ, exitFlag)    
 
     #while not TFBS.empty() and EXP_TFBS.empty():
     while not exitFlag:

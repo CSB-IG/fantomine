@@ -8,7 +8,7 @@ class Db_Controller(threading.Thread):
         self.threadID = threadID
         self.TFBSQ = TFBSQ
         self.EXP_TFBSQ = EXP_TFBSQ
-        self.con= set_con_db()
+        self.con= self.set_con_db()
         self.cursor = conection.cursor()
         self.exit_flag = exitFlag
         self.exp_genes = []
@@ -16,7 +16,7 @@ class Db_Controller(threading.Thread):
 
     def run(self):
         print "Starting " + self.name
-        process_data()
+        self.process_data()
         print "Exiting " + self.name
 
     #Set a connection with the db
@@ -44,13 +44,13 @@ class Db_Controller(threading.Thread):
     #Control data flow between the queues and the db
     def process_data():
         #first create tables 
-        create_tables()
+        self.create_tables()
         while not self.exitFlag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
-                add_TFBS2DB()
+                self.add_TFBS2DB()
             #then put news TFBS to explore in TFBSQ
-            get_new_targets()
+            self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
                 self.exit_flag = 1
@@ -66,11 +66,11 @@ class Db_Controller(threading.Thread):
             #if the gene is not yet in the db, then add that entry            
             if not gene_raw[0] in self.exp_genes: 
                 self.exp_genes[gene_raw[0]] = gene_raw
-                add_row(gene_raw)
+                self.add_row(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
                 g_w = gene_raw[2]
-                update_weight(g_w,gene1_q,gene2_q)
+                self.update_weight(g_w,gene1_q,gene2_q)
                 
 
     #Make a query for the id in db with the gene name
@@ -120,7 +120,7 @@ class Db_Controller(threading.Thread):
 	        print('There is no row with that genes')
         else:
             if float(g_w) < float(data[0]):
-                update_row(data[0],data[1]) 
+                self.update_row(data[0],data[1]) 
 
 
 	#Update the weight of an interaction
