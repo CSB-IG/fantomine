@@ -35,11 +35,11 @@ def main():
 	print "Todos los thread en la lista se inicializaron ######"
     #create Db_Controller thread
     db_thread = Db_Controller("Db_thread", TFBSQ, EXP_TFBSQ, exitFlag)
-	print "se creo el tread db_thread"
+		print "se creo el tread db_thread"
     #while not TFBS.empty() and EXP_TFBS.empty():
     while not exitFlag:
-		print "loop"
-		pass
+        print "loop"
+        pass
 
     exitFlag_Consumers = 1
 
