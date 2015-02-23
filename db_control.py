@@ -37,10 +37,12 @@ class Db_Controller(threading.Thread):
         table1 = "CREATE TABLE GENES (ID INTEGER PRIMARY KEY AUTOINCREMENT, GENE_ID TEXT NOT NULL,GENE_SYMBOL TEXT NOT NULL);"
         self.cursor.execute(table1)
         self.con.commit()
+				print "Se creo la tabla GENES correctamente"
         table2 = "CREATE TABLE GENES_INTER (ID INTEGER PRIMARY KEY AUTOINCREMENT, GENE1 INTEGER NOT NULL, GENE2 INTEGER NOT NULL, WEIGHT TEXT NOT NULL, FOREIGN KEY(GENE1) REFERENCES GENES(ID) ON DELETE CASCADE, FOREIGN KEY(GENE2) REFERENCES GENES(ID) ON DELETE CASCADE);"
         self.cursor.execute(table2)
         self.con.commit()
-                
+				print "Se creo la tabla GENES correctamente"        
+
     #Control data flow between the queues and the db
     def process_data():
         #first create tables 
