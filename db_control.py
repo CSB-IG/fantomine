@@ -12,20 +12,24 @@ class Db_Controller(threading.Thread):
         self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
         self.exp_genes = []
+        print "acaba el init"
         
 
     def run(self):
         print "Starting " + self.name
+        print "aqui"
         self.process_data()
         print "Exiting " + self.name
 
     #Set a connection with the db
     def set_con_db(self):
         #return sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
+        print "conexion a base"
         return sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db')
     
     #Create the tables in the db, if they exists, then drop them
     def create_tables(self):
+        print "create_tables"
         t1 = "GENES"
         t2 = "GENES_INTER"
         drop = "DROP TABLE IF EXISTS ?"

@@ -35,18 +35,18 @@ def main():
 	print "Todos los thread en la lista se inicializaron ######"
 	#create Db_Controller thread
 	db_thread = Db_Controller("Db_thread", TFBSQ, EXP_TFBSQ, exitFlag)
+	db_thread.start()
+        threads.append(db_thread)
 	print "se creo el tread db_thread"
 	#while not TFBS.empty() and EXP_TFBS.empty():
 	while not exitFlag:
-		print "loop"
 		pass
 
 	exitFlag_Consumers = 1
 
 	#Wait for all threads to complete
-	for t in threads:#
-		t.join()#
-	db_thread.join()
+	for t in threads:
+		t.join()
 
 	print "Exiting Main Thread, DATA MINING COMPLETE jeje"
     	
