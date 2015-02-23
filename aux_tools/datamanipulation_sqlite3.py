@@ -1,7 +1,7 @@
 import sqlite3
 
-con = sqlite3.connect('/home/daniel/Desktop/trabajo/tesis_final/miscellaneous/genes.bd')
-#con = sqlite3.connect('/Users/daniel/Desktop/genes.bd')
+#con = sqlite3.connect('/home/daniel/Desktop/trabajo/tesis_final/miscellaneous/genes.bd')
+con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db')
 #con = sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
 #con esta opcion habilitamos el borrado en cascada
 con.execute("PRAGMA foreign_keys = ON")
@@ -37,12 +37,12 @@ con.commit()
 '''
 
 #Mostrar elementos de la primera tabla
-'''
+
 print "=======GENES======="
 cursor.execute("SELECT ID, GENE_ID, GENE_SYMBOL FROM GENES")
 for i in cursor:
 	print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
-'''
+
 
 #para insertar en la segunda tabla
 '''
@@ -77,12 +77,12 @@ else:
 '''
 
 #mostrar elementos de la segunda tabla
-'''
+
 print "\n=======GENES_INTER======="
 cursor.execute("SELECT * FROM GENES_INTER")
 for i in cursor:
 	print "ID = ", i[0], "GENE1 = ", i[1], "GENE2 = ", i[2], "WEIGHT = ", i[3]
-'''
+
 
 #Mostrar la existencia de un registro 
 '''

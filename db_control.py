@@ -9,7 +9,7 @@ class Db_Controller(threading.Thread):
         self.TFBSQ = TFBSQ
         self.EXP_TFBSQ = EXP_TFBSQ
         self.con= self.set_con_db()
-        self.cursor = conection.cursor()
+        self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
         self.exp_genes = []
         
@@ -20,14 +20,14 @@ class Db_Controller(threading.Thread):
         print "Exiting " + self.name
 
     #Set a connection with the db
-    def set_con_db():
+    def set_con_db(self):
         #return sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
-        return sqlite3.connect('/Users/daniel/Desktop/trabajo/fantomine/db/genes.db')
+        return sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db')
     
     #Create the tables in the db, if they exists, then drop them
-    def create_tables():
+    def create_tables(self):
         t1 = "GENES"
-        t2 = "GENES__INTER"
+        t2 = "GENES_INTER"
         drop = "DROP TABLE IF EXISTS ?"
         self.cursor.execute(drop,(t1,))
         self.con.commit()
@@ -57,7 +57,7 @@ class Db_Controller(threading.Thread):
 
 
     #Add the gene and its interaction in the db 
-    def add_TFBS2DB():
+    def add_TFBS2DB(self):
         size_q = self.EXP_TFBSQ.size()
         while not size_q == 0:
             gene_raw = self.EXP_TFBSQ.get()
@@ -74,7 +74,7 @@ class Db_Controller(threading.Thread):
                 
 
     #Make a query for the id in db with the gene name
-    def query_id(gene):
+    def query_id(self, gene):
         att = (gene,)
         query = "SELECT ID FROM GENES WHERE GENE_ID = ?;"
         self.cursor.execute(query, att)
@@ -87,7 +87,7 @@ class Db_Controller(threading.Thread):
             return data[0]
 
     #Add a the new genes and interactions to db
-    def add_row(gene,q1,q2):
+    def add_row(self,gene,q1,q2):
         gene_id = gene[0]
         gene_sym = gene[1]
         gene_w = gene[2]
@@ -111,7 +111,7 @@ class Db_Controller(threading.Thread):
         self.con.commit()
     
     #Check the most high weight between all targets in/out, if the new weight is greater, change the weight with the new one
-    def update_weight(g_w,gene1,gene2):   
+    def update_weight(self,g_w,gene1,gene2):   
         att = (gene1,gene2)
         query = "SELECT ID, WEIGHT FROM GENES_INTER WHERE GENE1 = ? AND GENE2 = ?;"
         self.cursor.execute(query, att)
@@ -124,7 +124,7 @@ class Db_Controller(threading.Thread):
 
 
 	#Update the weight of an interaction
-    def update_row(id_row, weight):
+    def update_row(self,id_row, weight):
         att = (weight, id_gene)
         update = "UPDATE GENES_INTER SET WEIGHT = ? WHERE ID = ?;"
         self.cursor.execute(update, att)
