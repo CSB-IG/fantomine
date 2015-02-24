@@ -16,26 +16,27 @@ class Db_Controller(threading.Thread):
         
 
     def run(self):
-        print "Starting " + self.name
-        print "aqui"
+        print "Starting " + self.threadID
         self.process_data()
-        print "Exiting " + self.name
+        print "Exiting " + self.threadID
 
     #Set a connection with the db
     def set_con_db(self):
         #return sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
         print "conexion a base"
-        return sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db')
+        con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db', check_same_thread = False)
+        return con
     
     #Create the tables in the db, if they exists, then drop them
     def create_tables(self):
         print "create_tables"
         t1 = "GENES"
         t2 = "GENES_INTER"
-        drop = "DROP TABLE IF EXISTS ?"
-        self.cursor.execute(drop,(t1,))
+        drop1 = "DROP TABLE IF EXISTS GENES;"
+        drop2 = "DROP TABLE IF EXISTS GENES_INTER;"
+        self.cursor.execute(drop1)
         self.con.commit()
-        self.cursor.execute(drop,(t2,))
+        self.cursor.execute(drop2)
         self.con.commit()
 
         table1 = "CREATE TABLE GENES (ID INTEGER PRIMARY KEY AUTOINCREMENT, GENE_ID TEXT NOT NULL,GENE_SYMBOL TEXT NOT NULL);"
@@ -48,10 +49,10 @@ class Db_Controller(threading.Thread):
         print "Se creo la tabla GENES_INTER correctamente"        
 
     #Control data flow between the queues and the db
-    def process_data():
+    def process_data(self):
         #first create tables 
         self.create_tables()
-        while not self.exitFlag:
+        while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
                 self.add_TFBS2DB()
