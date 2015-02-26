@@ -11,7 +11,8 @@ class Db_Controller(threading.Thread):
         self.con= self.set_con_db()
         self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
-        self.exp_genes = []
+        self.exp_genes = {}
+        self.list_genes = []
         print "acaba el init"
         
 
@@ -70,14 +71,15 @@ class Db_Controller(threading.Thread):
             gene_raw = self.EXP_TFBSQ.get()
             gene1_q = query_id(gene[1])
             gene2_q = query_id(gene[3])
-            #if the gene is not yet in the db, then add that entry            
+            #if the gene is not yet in the db, then add that entry to dict (exp_genes)            
             if not gene_raw[0] in self.exp_genes: 
                 self.exp_genes[gene_raw[0]] = gene_raw
+                self.list_genes.append(gene_raw[0])
                 self.add_row(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
-                g_w = gene_raw[2]
-                self.update_weight(g_w,gene1_q,gene2_q)
+                self.list_genes.remove(gene_raw[0]) #cachar el error 
+                self.update_weight(gene_raw[2],gene1_q,gene2_q)
                 
 
     #Make a query for the id in db with the gene name
