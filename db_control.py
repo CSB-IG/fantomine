@@ -11,11 +11,10 @@ class Db_Controller(threading.Thread):
         self.con= self.set_con_db()
         self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
-        self.exp_genes = {}
-        self.list_genes = []
+        self.unexp_genes = [] #explored genes list
+        self.set_genes = set() #control set
         print "acaba el init"
         
-
     def run(self):
         print "Starting " + self.threadID
         self.process_data()
@@ -63,7 +62,6 @@ class Db_Controller(threading.Thread):
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
                 self.exit_flag = 1
 
-
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
         size_q = self.EXP_TFBSQ.size()
@@ -71,17 +69,15 @@ class Db_Controller(threading.Thread):
             gene_raw = self.EXP_TFBSQ.get()
             gene1_q = query_id(gene[1])
             gene2_q = query_id(gene[3])
-            #if the gene is not yet in the db, then add that entry to dict (exp_genes)            
-            if not gene_raw[0] in self.exp_genes: 
-                self.exp_genes[gene_raw[0]] = gene_raw
-                self.list_genes.append(gene_raw[0])
+            #if the gene is not yet in the db, then add that entry to dict (set_genes)            
+            if not gene_raw[0] in self.set_genes: 
+                self.set_genes.add(gene_raw[0]) 
+                self.unexp_genes.append(gene_raw[0])
                 self.add_row(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
-                self.list_genes.remove(gene_raw[0]) #cachar el error 
                 self.update_weight(gene_raw[2],gene1_q,gene2_q)
                 
-
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
         att = (gene,)
@@ -131,7 +127,6 @@ class Db_Controller(threading.Thread):
             if float(g_w) < float(data[0]):
                 self.update_row(data[0],data[1]) 
 
-
 	#Update the weight of an interaction
     def update_row(self,id_row, weight):
         att = (weight, id_gene)
@@ -139,6 +134,10 @@ class Db_Controller(threading.Thread):
         self.cursor.execute(update, att)
         self.con.commit()
 
+    #put all unxplore genes of unexp_genes list in EXP_TFBSQ queue for consumer threads
+    def get_new_targets(self):
+        for g in self.unexp_genes:
+            self.EXP_TFBSQ.append(self.unexp_genes.remove(g))
 ########################END CLASS Db_Controller########################
 
 
