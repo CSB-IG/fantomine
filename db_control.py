@@ -137,7 +137,9 @@ class Db_Controller(threading.Thread):
     #put all unxplore genes of unexp_genes list in EXP_TFBSQ queue for consumer threads
     def get_new_targets(self):
         for g in self.unexp_genes:
-            self.EXP_TFBSQ.append(self.unexp_genes.remove(g))
+            self.EXP_TFBSQ.put(self.unexp_genes.remove(g))
+        print "En new_targetss"        
+        
 ########################END CLASS Db_Controller########################
 
 
