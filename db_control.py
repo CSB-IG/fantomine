@@ -55,8 +55,8 @@ class Db_Controller(threading.Thread):
         while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
-								print "paso por el primer if"
-                self.add_TFBS2DB()
+		print "paso por el primer if"
+		self.add_TFBS2DB()
             #then put news TFBS to explore in TFBSQ
             self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
