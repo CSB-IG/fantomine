@@ -1,5 +1,6 @@
 import threading
 import sqlite3
+import time
 
 class Db_Controller(threading.Thread):
 	
@@ -52,6 +53,7 @@ class Db_Controller(threading.Thread):
     def process_data(self):
         #first create tables 
         self.create_tables()
+				time.sleep(20)
         while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
