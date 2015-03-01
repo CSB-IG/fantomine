@@ -25,11 +25,11 @@ class Url_Id_Consumer(threading.Thread):
         while not self.exitFlag: 
             if not t_Q.empty():
                 id_gene = t_Q.get()
-                print "%s processing %s" % (threadName, id_gene) 
+                print "{0} processing {1}".format(threadName, id_gene) 
                 #calling crawler
                 self.extract_data(id_gene, ex_Q)
             else:
-                #print "thread %s is sleeping", threadName 
+                #print "t_Q is empty\nthread {0} is sleeping".format(threadName) 
                 time.sleep(1)
 
     #search the genes in the xml pages of fantom db edge expression through http request 
