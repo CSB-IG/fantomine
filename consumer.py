@@ -29,7 +29,7 @@ class Url_Id_Consumer(threading.Thread):
                 #calling crawler
                 self.extract_data(id_gene, ex_Q)
             else:
-                #print "thread %s is sleeping", threadName 
+                print "thread %s is sleeping", threadName 
                 time.sleep(1)
 
     #search the genes in the xml pages of fantom db edge expression through http request 

@@ -40,6 +40,9 @@ con.commit()
 
 print "=======GENES======="
 cursor.execute("SELECT ID, GENE_ID, GENE_SYMBOL FROM GENES")
+data = cursor.fetchone()
+if data is None:
+	print "no hay nada"
 for i in cursor:
 	print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
 
@@ -80,6 +83,9 @@ else:
 
 print "\n=======GENES_INTER======="
 cursor.execute("SELECT * FROM GENES_INTER")
+data  = cursor.fetchone()
+if data is None:
+	print "no hay nada"
 for i in cursor:
 	print "ID = ", i[0], "GENE1 = ", i[1], "GENE2 = ", i[2], "WEIGHT = ", i[3]
 
