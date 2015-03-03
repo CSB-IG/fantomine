@@ -19,7 +19,7 @@ def main():
 	#exit flag for consumers
 	exitFlag_Consumers = 0  
 	#a feature_id_gene for begin to explore
-	TFBSQ.queue.append('5558263')
+	TFBSQ.queue.append(('SRF','5558263'))
 
 	#enum the consumerthreads
 	for i in range(MAX_NUM_T):

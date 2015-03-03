@@ -34,7 +34,7 @@ class Url_Id_Consumer(threading.Thread):
 
     #search the genes in the xml pages of fantom db edge expression through http request 
     def extract_data(self, id_gene, ex_Q):
-        req = urllib2.Request('http://fantom.gsc.riken.jp/4/edgeexpress/cgi/edgeexpress.fcgi?id='+id_gene)
+        req = urllib2.Request('http://fantom.gsc.riken.jp/4/edgeexpress/cgi/edgeexpress.fcgi?id='+id_gene[1])
         response = urllib2.urlopen(req)
         the_page = response.read()
         tree = etree.XML(the_page)
@@ -51,9 +51,9 @@ class Url_Id_Consumer(threading.Thread):
         for i in input_pro:
             id_gene = i.findall('link_from')
             for g in id_gene:
-                tup1 = (g.attrib['feature_id'],g.attrib['name'],g.attrib['weight'],id_g,'0')
+                tup1 = (g.attrib['feature_id'],g.attrib['name'],g.attrib['weight'],id_g[0],id_g[1],'0')
                 ex_Q.put(tup1)
-                print "en cola: {0}, {1}, {2}, {3}, {4}".format(tup1[0],tup1[1],tup1[2],tup1[3],tup1[4])
+                print "en cola: {0}, {1}, {2}, {3}, {4}, {5}".format(tup1[0],tup1[1],tup1[2],tup1[3],tup1[4],tup1[5])
 
     
     #extract targets of the next gene in the queue
@@ -62,9 +62,9 @@ class Url_Id_Consumer(threading.Thread):
         print "\n\npromoter_to_edges"
         output_pro = tree.findall('tfbs_predictions/link_to')
         for o in output_pro:
-            tup2 = (o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_g,'1')
+            tup2 = (o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_g[0],id_g[1],'1')
             ex_Q.put(tup2)
-            print "en cola: {0}, {1}, {2}, {3}, {4}".format(tup2[0],tup2[1],tup2[2],tup2[3],tup2[4])
+            print "en cola: {0}, {1}, {2}, {3}, {4}, {5}".format(tup2[0],tup2[1],tup2[2],tup2[3],tup2[4],tup2[5])
 
 
 ########################END CLASS Url_Id_Consumer########################

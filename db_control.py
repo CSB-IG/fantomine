@@ -53,46 +53,47 @@ class Db_Controller(threading.Thread):
     def process_data(self):
         #first create tables 
         self.create_tables()
-				time.sleep(20)
+        time.sleep(10)  
         while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
-		print "paso por el primer if"
-		self.add_TFBS2DB()
+		        print "paso por el primer if"
+		        self.add_TFBS2DB()
             #then put news TFBS to explore in TFBSQ
             self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
-							print "paso por el segundo if"                
-							self.exit_flag = 1
+                print "paso por el segundo if"                
+                self.exit_flag = 1
 
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
-        size_q = self.EXP_TFBSQ.size()
+        size_q = self.EXP_TFBSQ.qsize()
         while not size_q == 0:
             gene_raw = self.EXP_TFBSQ.get()
-            gene1_q = query_id(gene[1])
-            gene2_q = query_id(gene[3])
             #if the gene is not yet in the db, then add that entry to dict (set_genes)            
             if not gene_raw[0] in self.set_genes: 
                 self.set_genes.add(gene_raw[0]) 
-                self.unexp_genes.append(gene_raw[0])
+                self.unexp_genes.append((gene_raw[1],gene_raw[0]))
                 self.add_row(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
+                gene1_q = self.query_id(gene_raw[1])
+                gene2_q = self.query_id(gene_raw[3])
                 self.update_weight(gene_raw[2],gene1_q,gene2_q)
+            size_q-=1
                 
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
         att = (gene,)
         query = "SELECT ID FROM GENES WHERE GENE_ID = ?;"
         self.cursor.execute(query, att)
-        data=cursor.fetchone()
+        data=self.cursor.fetchone()
         if data is None:
-            print('There is no component named %s'%gene)
+            print 'There is no component named {0}'.format(gene)
             return 0
         else:
-            print('Component %s found with rowid %s'%(gene,data[0]))
+            print 'Component {0} found with rowid {1}'.format(gene,data[0])
             return data[0]
 
     #Add a the new genes and interactions to db
@@ -106,15 +107,15 @@ class Db_Controller(threading.Thread):
 
         #insert in first table
         insert1 = "INSERT INTO GENES (ID, GENE_ID, GENE_SYMBOL) VALUES (NULL,?,?);"
-        self.con.execute(insert1,param)
+        self.con.execute(insert1,param1)
         self.con.commit()
         
         #insert in second table
         insert2 = "INSERT INTO GENES_INTER (ID, GENE1, GENE2, WEIGHT) VALUES (NULL,?,?,?);"
         if gene[4] == '0':          
-            param2 = (q1,q2,gene_weight)  
+            param2 = (q1,q2,gene_w)  
         else:
-            param2 = (q2,q1,gene_weight)
+            param2 = (q2,q1,gene_w)
   
         self.con.execute(insert2,param2)
         self.con.commit()
@@ -133,7 +134,7 @@ class Db_Controller(threading.Thread):
 
 	#Update the weight of an interaction
     def update_row(self,id_row, weight):
-        att = (weight, id_gene)
+        att = (weight, id_row)
         update = "UPDATE GENES_INTER SET WEIGHT = ? WHERE ID = ?;"
         self.cursor.execute(update, att)
         self.con.commit()
@@ -142,7 +143,7 @@ class Db_Controller(threading.Thread):
     def get_new_targets(self):
         for g in self.unexp_genes:
             self.EXP_TFBSQ.put(self.unexp_genes.remove(g))
-        print "En new_targetss"        
+        print "En new_targets"        
         
 ########################END CLASS Db_Controller########################
 
