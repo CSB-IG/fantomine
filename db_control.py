@@ -69,18 +69,22 @@ class Db_Controller(threading.Thread):
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
         size_q = self.EXP_TFBSQ.qsize()
-        while not size_q == 0:
+        while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
+            print "en add_TFBS2DB {0}".format(gene_raw)
+            try:
             #if the gene is not yet in the db, then add that entry to set (set_genes)            
-            if not gene_raw[0] in self.set_genes: 
-                self.set_genes.add(gene_raw[0]) 
-                self.unexp_genes.append((gene_raw[1],gene_raw[0]))
-                self.add_row(gene_raw)
+                if not gene_raw[0] in self.set_genes: 
+                    self.set_genes.add(gene_raw[0]) 
+                    self.unexp_genes.append((gene_raw[1],gene_raw[0]))
+                    self.add_row(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
-            else:
-                gene1_q = self.query_id(gene_raw[0])
-                gene2_q = self.query_id(gene_raw[4])
-                self.update_weight(gene_raw[2],gene1_q,gene2_q)
+                else:
+                    gene1_q = self.query_id(gene_raw[0])
+                    gene2_q = self.query_id(gene_raw[4])
+                    self.update_weight(gene_raw[2],gene1_q,gene2_q)
+            except TypeError:
+                print "aqui :p el tamaño de la cola es: {0}".format(size_q)
             size_q-=1
                 
     #Make a query for the id in db with the gene name
@@ -101,7 +105,8 @@ class Db_Controller(threading.Thread):
         gene_id = gene[0]
         gene_sym = gene[1]
         gene_w = gene[2]
-        gene_piv = gene[3]    
+        gene_piv = gene[3]
+        gene_piv_id = gene[4]    
 
         param1 = (gene_id,gene_sym)    
 
@@ -112,8 +117,8 @@ class Db_Controller(threading.Thread):
         
         #insert in second table
         insert2 = "INSERT INTO GENES_INTER (ID, GENE1, GENE2, WEIGHT) VALUES (NULL,?,?,?);"
-        q1 = self.query_id(gene_raw[0]) 
-        q2 = self.query_id(gene_raw[4])
+        q1 = self.query_id(gene_id) 
+        q2 = self.query_id(gene_piv_id)
         if gene[5] == '0':          
             param2 = (q1,q2,gene_w)  
         else:
@@ -126,7 +131,7 @@ class Db_Controller(threading.Thread):
     def update_weight(self,g_w,gene1,gene2):   
         att = (gene1,gene2)
         query = "SELECT ID, WEIGHT FROM GENES_INTER WHERE GENE1 = ? AND GENE2 = ?;"
-        self.cursor.execute(query, att)
+        self.cursor.execute(query, att) 
         data=self.cursor.fetchone()
         if data is None:
 	        print('There is no row with that genes')
@@ -144,8 +149,7 @@ class Db_Controller(threading.Thread):
     #put all unxplore genes of unexp_genes list in EXP_TFBSQ queue for consumer threads
     def get_new_targets(self):
         for g in self.unexp_genes:
-            self.EXP_TFBSQ.put(self.unexp_genes.remove(g))
-        print "En new_targets"        
+            self.EXP_TFBSQ.put(self.unexp_genes.remove(g))        
         
 ########################END CLASS Db_Controller########################
 
