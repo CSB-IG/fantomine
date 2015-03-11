@@ -69,6 +69,7 @@ class Db_Controller(threading.Thread):
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
         size_q = self.EXP_TFBSQ.qsize()
+		print "tamaño ",size_q
         while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
             print "en add_TFBS2DB {0}".format(gene_raw)
@@ -84,8 +85,9 @@ class Db_Controller(threading.Thread):
                     gene2_q = self.query_id(gene_raw[4])
                     self.update_weight(gene_raw[2],gene1_q,gene2_q)
             except TypeError:
-                print "aqui :p el tamaño de la cola es: {0}".format(size_q)
+                print "bla"
             size_q-=1
+			print "tamaño reducido ", size_q
                 
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
@@ -148,6 +150,7 @@ class Db_Controller(threading.Thread):
 
     #put all unxplore genes of unexp_genes list in EXP_TFBSQ queue for consumer threads
     def get_new_targets(self):
+        print "paso por new targets"
         for g in self.unexp_genes:
             self.EXP_TFBSQ.put(self.unexp_genes.remove(g))        
         
