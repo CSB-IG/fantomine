@@ -69,7 +69,7 @@ class Db_Controller(threading.Thread):
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
         size_q = self.EXP_TFBSQ.qsize()
-		print "tamaño ",size_q
+        print "size ",size_q
         while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
             print "en add_TFBS2DB {0}".format(gene_raw)
@@ -87,7 +87,7 @@ class Db_Controller(threading.Thread):
             except TypeError:
                 print "bla"
             size_q-=1
-			print "tamaño reducido ", size_q
+            print "size reducido ", size_q
                 
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
