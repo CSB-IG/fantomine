@@ -58,7 +58,7 @@ class Db_Controller(threading.Thread):
     #Control data flow between the queues and the db
     def process_data(self):
         #first create tables 
-        self.init_db(self)
+        self.init_db()
         while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
@@ -82,7 +82,7 @@ class Db_Controller(threading.Thread):
             size_q-=1
             print "size reducido ", size_q
 
-    def add_rows(self,gene_raw)
+    def add_rows(self,gene_raw):
         try:
             #if the gene is not yet in the db, then add that entry to set (set_genes)            
             if not gene_raw[0] in self.set_genes:
@@ -91,7 +91,7 @@ class Db_Controller(threading.Thread):
                  self.set_genes.add(gene_id)
                  self.unexp_genes.append((gene_sym,gene_id))
                  self.add_row_GENES(self,gene_id,gene_sym)
-                 self.add_row_GENES_INTER(self,gene_raw):
+                 self.add_row_GENES_INTER(self,gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
                 gene1_q = self.query_id(gene_raw[0])

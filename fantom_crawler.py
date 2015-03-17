@@ -21,7 +21,7 @@ def main():
 	#a feature_id_gene for begin to explore
 	TFBSQ.queue.append(('SRF','5558263'))
     #flag that show if a genes were in db
-    ft = 0
+	ft = 0
 
 	#enum the consumerthreads
 	for i in range(MAX_NUM_T):
