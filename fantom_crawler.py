@@ -20,6 +20,8 @@ def main():
 	exitFlag_Consumers = 0  
 	#a feature_id_gene for begin to explore
 	TFBSQ.queue.append(('SRF','5558263'))
+    #flag that show if a genes were in db
+    ft = 0
 
 	#enum the consumerthreads
 	for i in range(MAX_NUM_T):
@@ -34,7 +36,7 @@ def main():
 
 	print "Todos los thread en la lista se inicializaron ######"
 	#create Db_Controller thread
-	db_thread = Db_Controller("Db_thread", TFBSQ, EXP_TFBSQ, exitFlag)
+	db_thread = Db_Controller("Db_thread", TFBSQ, EXP_TFBSQ, exitFlag, ft)
 	db_thread.start()
         threads.append(db_thread)
 	print "se creo el tread db_thread"

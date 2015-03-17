@@ -4,7 +4,7 @@ import time
 
 class Db_Controller(threading.Thread):
 	
-    def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag):
+    def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag, ft):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.TFBSQ = TFBSQ
@@ -12,6 +12,7 @@ class Db_Controller(threading.Thread):
         self.con= self.set_con_db()
         self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
+        self.ft = ft
         self.unexp_genes = [] #explored genes list
         self.set_genes = set() #control set
         print "acaba el init"
@@ -28,6 +29,11 @@ class Db_Controller(threading.Thread):
         con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db', check_same_thread = False)
         return con
     
+    def init_db(self):
+        create_tables()
+        self.add_row_GENES(self,"5558263","SRF")
+        time.sleep(10)
+
     #Create the tables in the db, if they exists, then drop them
     def create_tables(self):
         print "create_tables"
@@ -52,8 +58,7 @@ class Db_Controller(threading.Thread):
     #Control data flow between the queues and the db
     def process_data(self):
         #first create tables 
-        self.create_tables()
-        time.sleep(10)  
+        self.init_db(self)
         while not self.exit_flag:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
