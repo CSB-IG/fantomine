@@ -33,7 +33,7 @@ class Db_Controller(threading.Thread):
         create_tables()
         self.add_row_GENES(self,"5558263","SRF")
         time.sleep(10)
-
+ 
     #Create the tables in the db, if they exists, then drop them
     def create_tables(self):
         print "create_tables"
