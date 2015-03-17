@@ -28,11 +28,6 @@ class Db_Controller(threading.Thread):
         print "conexion a base"
         con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db', check_same_thread = False)
         return con
-    
-    def init_db(self):
-        create_tables()
-        self.add_row_GENES(self,"5558263","SRF")
-        time.sleep(10)
  
     #Create the tables in the db, if they exists, then drop them
     def create_tables(self):
@@ -54,6 +49,11 @@ class Db_Controller(threading.Thread):
         self.cursor.execute(table2)
         self.con.commit()
         print "Se creo la tabla GENES_INTER correctamente"        
+
+    def init_db(self):
+        create_tables()
+        self.add_row_GENES(self,"5558263","SRF")
+        time.sleep(10)
 
     #Control data flow between the queues and the db
     def process_data(self):
