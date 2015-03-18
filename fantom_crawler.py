@@ -43,7 +43,7 @@ def main():
 	#while not TFBS.empty() and EXP_TFBS.empty():
 	while not exitFlag:
 		pass
-
+        print "pass"
 	exitFlag_Consumers = 1
 
 	#Wait for all threads to complete

@@ -51,8 +51,8 @@ class Db_Controller(threading.Thread):
         print "Se creo la tabla GENES_INTER correctamente"        
 
     def init_db(self):
-        create_tables()
-        self.add_row_GENES(self,"5558263","SRF")
+        self.create_tables()
+        self.add_row_GENES("5558263","SRF")
         time.sleep(10)
 
     #Control data flow between the queues and the db
@@ -64,11 +64,21 @@ class Db_Controller(threading.Thread):
             if not self.EXP_TFBSQ.empty():
 		        print "paso por el primer if"
 		        self.add_TFBS2DB()
+            else:
+                print "duermo 20 segundos"
+                time.sleep(20)
+                print "desperte!!!"
             #then put news TFBS to explore in TFBSQ
-            self.get_new_targets()
+            if not self.TFBSQ.empty():
+                print "paso por el segundo if"
+            	self.get_new_targets()
+            else: 
+                print "duermo 20 segundos por segunda vez"
+                time.sleep(20)
+                print "desperte!!!"
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
-                print "paso por el segundo if"                
+                print "paso por el tercer if"                
                 self.exit_flag = 1
 
     #Add the gene and its interaction in the db 
@@ -78,7 +88,7 @@ class Db_Controller(threading.Thread):
         while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
             print "en add_TFBS2DB {0}".format(gene_raw)
-            add_rows(self,gene_raw)
+            self.add_rows(gene_raw)
             size_q-=1
             print "size reducido ", size_q
 
@@ -90,8 +100,8 @@ class Db_Controller(threading.Thread):
                  gene_sym = gene_raw[1]
                  self.set_genes.add(gene_id)
                  self.unexp_genes.append((gene_sym,gene_id))
-                 self.add_row_GENES(self,gene_id,gene_sym)
-                 self.add_row_GENES_INTER(self,gene_raw)
+                 self.add_row_GENES(gene_id,gene_sym)
+                 self.add_row_GENES_INTER(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else:
                 gene1_q = self.query_id(gene_raw[0])
@@ -111,7 +121,7 @@ class Db_Controller(threading.Thread):
             print 'There is no component named {0}'.format(gene)
             return 0 #necesito checar como cambiar esta parte
         else:
-            print 'Component {0} found with rowid {1}'.format(gene,data[0])
+            #print 'Component {0} found with rowid {1}'.format(gene,data[0])
             return data[0]
 
     #Add a the new genes to db 
@@ -168,7 +178,7 @@ class Db_Controller(threading.Thread):
             print "el tamano de la lista es ", len(self.unexp_genes)
             print self.unexp_genes 
             for g in self.unexp_genes:
-                a = self.EXP_TFBSQ.put(g[1])
+                a = self.TFBSQ.put(g[1])
                 self.unexp_genes.remove(g)
         
 ########################END CLASS Db_Controller########################
