@@ -65,17 +65,11 @@ class Db_Controller(threading.Thread):
 		        print "paso por el primer if"
 		        self.add_TFBS2DB()
             else:
-                print "duermo 20 segundos"
-                time.sleep(20)
+                print "duermo 60 segundos"
+                time.sleep(60)
                 print "desperte!!!"
-            #then put news TFBS to explore in TFBSQ
-            if not self.TFBSQ.empty():
-                print "paso por el segundo if"
-            	self.get_new_targets()
-            else: 
-                print "duermo 20 segundos por segunda vez"
-                time.sleep(20)
-                print "desperte!!!"
+            #then put news TFBS to explore in TFBS
+            self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
                 print "paso por el tercer if"                
@@ -90,7 +84,6 @@ class Db_Controller(threading.Thread):
             print "en add_TFBS2DB {0}".format(gene_raw)
             self.add_rows(gene_raw)
             size_q-=1
-            print "size reducido ", size_q
 
     def add_rows(self,gene_raw):
         try:
@@ -103,7 +96,7 @@ class Db_Controller(threading.Thread):
                  self.add_row_GENES(gene_id,gene_sym)
                  self.add_row_GENES_INTER(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
-            else:
+            else: #SE PODRA OPTIMIZAR CONSULTAS SABIENDO COMO SE METE EN EL DICCIONARIO
                 gene1_q = self.query_id(gene_raw[0])
                 gene2_q = self.query_id(gene_raw[4])
                 self.update_weight(gene_raw[2],gene1_q,gene2_q,gene_raw[5])
@@ -160,6 +153,7 @@ class Db_Controller(threading.Thread):
 	        print('There is no row with that genes')
         else:
             if float(g_w) < float(data[0]):
+                print "update_weigt"
                 self.update_row(data[0],data[1]) 
 
 	#Update the weight of an interaction
@@ -176,7 +170,7 @@ class Db_Controller(threading.Thread):
             print "esta vacio el queue"
         else:
             print "el tamano de la lista es ", len(self.unexp_genes)
-            print self.unexp_genes 
+            print self.unexp_genes
             for g in self.unexp_genes:
                 a = self.TFBSQ.put(g[1])
                 self.unexp_genes.remove(g)

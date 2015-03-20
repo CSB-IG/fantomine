@@ -2,6 +2,9 @@ from consumer import Url_Id_Consumer
 from db_control import Db_Controller
 import Queue
 
+
+
+
 def main():
 
 	#name of threads
@@ -42,8 +45,8 @@ def main():
 	print "se creo el tread db_thread"
 	#while not TFBS.empty() and EXP_TFBS.empty():
 	while not exitFlag:
-		pass
-        print "pass"
+            pass
+        
 	exitFlag_Consumers = 1
 
 	#Wait for all threads to complete
