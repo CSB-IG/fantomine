@@ -65,8 +65,8 @@ class Db_Controller(threading.Thread):
 		        print "paso por el primer if"
 		        self.add_TFBS2DB()
             else:
-                print "duermo 60 segundos"
-                time.sleep(60)
+                print "duermo 10 segundos"
+                time.sleep(10)
                 print "desperte!!!"
             #then put news TFBS to explore in TFBS
             self.get_new_targets()
@@ -86,20 +86,17 @@ class Db_Controller(threading.Thread):
             size_q-=1
 
     def add_rows(self,gene_raw):
-        try:
-            #if the gene is not yet in the db, then add that entry to set (set_genes)            
-            if not gene_raw[0] in self.set_genes:
-                 gene_id = gene_raw[0]
-                 gene_sym = gene_raw[1]
-                 self.set_genes.add(gene_id)
-                 self.unexp_genes.append((gene_sym,gene_id))
-                 self.add_row_GENES(gene_id,gene_sym)
-                 self.add_row_GENES_INTER(gene_raw)
-            #if the gene is in, then check if the weight is greater than the others in db           
-            else: #SE PODRA OPTIMIZAR CONSULTAS SABIENDO COMO SE METE EN EL DICCIONARIO
-                self.update_weight(gene_raw[2],self.query_id(gene_raw[0]),self.query_id(gene_raw[4]),gene_raw[5])
-        except TypeError:
-            print "bla"
+        #if the gene is not yet in the db, then add that entry to set (set_genes)            
+        if not gene_raw[0] in self.set_genes:
+             gene_id = gene_raw[0]
+             gene_sym = gene_raw[1]
+             self.set_genes.add(gene_id)
+             self.unexp_genes.append((gene_sym,gene_id))
+             self.add_row_GENES(gene_id,gene_sym)
+             self.add_row_GENES_INTER(gene_raw)
+        #if the gene is in, then check if the weight is greater than the others in db           
+        else: #LO QUE PASA ES QUE SI ESTA EL GEN PERO NO ESTA EN EL SENTIDO QUE ESTA EN LA INTERACCION, SE TIENE QUE MODIFICAR ESTE MODULO O EL DE UPDATE_WEIGHT
+            self.update_weight(gene_raw[2],self.query_id(gene_raw[0]),self.query_id(gene_raw[4]),gene_raw[5])
 
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
