@@ -97,13 +97,10 @@ class Db_Controller(threading.Thread):
                  self.add_row_GENES_INTER(gene_raw)
             #if the gene is in, then check if the weight is greater than the others in db           
             else: #SE PODRA OPTIMIZAR CONSULTAS SABIENDO COMO SE METE EN EL DICCIONARIO
-                gene1_q = self.query_id(gene_raw[0])
-                gene2_q = self.query_id(gene_raw[4])
-                self.update_weight(gene_raw[2],gene1_q,gene2_q,gene_raw[5])
+                self.update_weight(gene_raw[2],self.query_id(gene_raw[0]),self.query_id(gene_raw[4]),gene_raw[5])
         except TypeError:
             print "bla"
 
-                
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
         att = (gene,)
@@ -139,7 +136,6 @@ class Db_Controller(threading.Thread):
         self.con.execute(insert2,param2)
         self.con.commit()
 
-
     #Check the most high weight between all targets in/out, if the new weight is greater, change the weight with the new one
     def update_weight(self,g_w,gene1,gene2,in_out):
         if in_out == '0':   
@@ -172,7 +168,7 @@ class Db_Controller(threading.Thread):
             print "el tamano de la lista es ", len(self.unexp_genes)
             print self.unexp_genes
             for g in self.unexp_genes:
-                a = self.TFBSQ.put(g[1])
+                a = self.TFBSQ.put(g)
                 self.unexp_genes.remove(g)
         
 ########################END CLASS Db_Controller########################

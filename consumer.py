@@ -24,29 +24,29 @@ class Url_Id_Consumer(threading.Thread):
     def process_genes(self, threadName, t_Q, ex_Q):
         while not self.exitFlag: 
             if not t_Q.empty():
-                id_gene = t_Q.get()
-                print "{0} processing {1}".format(threadName, id_gene) 
+                id_gene = t_Q.get() 
                 #calling crawler
-                self.extract_data(id_gene, ex_Q)
+                self.extract_data(threadName, id_gene, ex_Q)
             else:
                 #print "t_Q is empty\nthread {0} is sleeping".format(threadName) 
                 time.sleep(1)
 
     #search the genes in the xml pages of fantom db edge expression through http request 
-    def extract_data(self, id_gene, ex_Q):
+    def extract_data(self, threadName, id_gene, ex_Q):
         req = urllib2.Request('http://fantom.gsc.riken.jp/4/edgeexpress/cgi/edgeexpress.fcgi?id='+id_gene[1])
         response = urllib2.urlopen(req)
         the_page = response.read()
         tree = etree.XML(the_page)
+        print "\n\n{0} processing {1}".format(threadName, id_gene)
 	    #call the extract methods
         self.extract_input_promoters(tree, ex_Q,id_gene)
         self.extract_out_promoters(tree, ex_Q,id_gene)
 		
 
 	#extract promoters of the next gene in the queue
-    def extract_input_promoters(self, tree, ex_Q,id_g):
+    def extract_input_promoters(self, tree, ex_Q, id_g):
         #INPUT PROMOTERS_FROM_EDGE
-        print "promoter_from_edges"
+        print "PROMOTERS_FROM_EDGE"
         input_pro = tree.findall('promoters/promoter_from_edges')
         for i in input_pro:
             id_gene = i.findall('link_from')
@@ -57,9 +57,9 @@ class Url_Id_Consumer(threading.Thread):
 
     
     #extract targets of the next gene in the queue
-    def extract_out_promoters(self, tree, ex_Q,id_g):
+    def extract_out_promoters(self, tree, ex_Q, id_g):
         #OUTPUT PROMOTERS_TO_EDGE
-        print "\n\npromoter_to_edges"
+        print "\nPROMOTER TO EDGE"
         output_pro = tree.findall('tfbs_predictions/link_to')
         for o in output_pro:
             tup2 = (o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_g[0],id_g[1],'1')
