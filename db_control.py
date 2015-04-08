@@ -72,7 +72,7 @@ class Db_Controller(threading.Thread):
             self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
-                print "paso por el tercer if"                
+                print "SE ACABO ESTO"                
                 self.exit_flag = 1
 
     #Add the gene and its interaction in the db 
@@ -81,7 +81,7 @@ class Db_Controller(threading.Thread):
         print "size ",size_q
         while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
-            print "en add_TFBS2DB {0}".format(gene_raw)
+            #print "en add_TFBS2DB {0}".format(gene_raw)
             self.add_rows(gene_raw)
             size_q-=1
 
@@ -96,20 +96,10 @@ class Db_Controller(threading.Thread):
              self.add_row_GENES_INTER(gene_raw)
         #if the gene is in, then check if the weight is greater than the others in db           
         else: #LO QUE PASA ES QUE SI ESTA EL GEN PERO NO ESTA EN EL SENTIDO QUE ESTA EN LA INTERACCION, SE TIENE QUE MODIFICAR ESTE MODULO O EL DE UPDATE_WEIGHT
-            self.update_weight(gene_raw[2],self.query_id(gene_raw[0]),self.query_id(gene_raw[4]),gene_raw[5])
-
-    #Make a query for the id in db with the gene name
-    def query_id(self, gene):
-        att = (gene,)
-        query = "SELECT ID FROM GENES WHERE GENE_ID = ?;"
-        self.cursor.execute(query, att)
-        data=self.cursor.fetchone()
-        if data is None:
-            print 'There is no component named {0}'.format(gene)
-            return 0 #necesito checar como cambiar esta parte
-        else:
-            #print 'Component {0} found with rowid {1}'.format(gene,data[0])
-            return data[0]
+            q1 = self.query_id(gene_raw[0])
+            q2 = self.query_id(gene_raw[4])
+            if not (q1 is None and q2 is None):
+                self.check_update(gene_raw[2],q1[0],q2[0],gene_raw[5])
 
     #Add a the new genes to db 
     def add_row_GENES(self,gene_id,gene_sym):
@@ -133,8 +123,16 @@ class Db_Controller(threading.Thread):
         self.con.execute(insert2,param2)
         self.con.commit()
 
+    #Make a query for the id in db with the gene name
+    def query_id(self, gene):
+        att = (gene,)
+        query = "SELECT ID FROM GENES WHERE GENE_ID = ?;"
+        self.cursor.execute(query, att)
+        data=self.cursor.fetchone()
+        return data
+
     #Check the most high weight between all targets in/out, if the new weight is greater, change the weight with the new one
-    def update_weight(self,g_w,gene1,gene2,in_out):
+    def check_update(self,g_w,gene1,gene2,in_out):
         if in_out == '0':   
             att = (gene1,gene2)
         else:
@@ -147,10 +145,10 @@ class Db_Controller(threading.Thread):
         else:
             if float(g_w) < float(data[0]):
                 print "update_weigt"
-                self.update_row(data[0],data[1]) 
+                self.update_weight(data[0],data[1]) 
 
 	#Update the weight of an interaction
-    def update_row(self,id_row, weight):
+    def update_weight(self,id_row, weight):
         att = (weight, id_row)
         update = "UPDATE GENES_INTER SET WEIGHT = ? WHERE ID = ?;"
         self.cursor.execute(update, att)
