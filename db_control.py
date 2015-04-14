@@ -14,7 +14,7 @@ class Db_Controller(threading.Thread):
         self.exit_flag = exitFlag
         self.ft = ft
         self.unexp_genes = [] #explored genes list
-        self.set_genes = set() #control set
+        self.set_genes = set() #control dict
         print "acaba el init"
         
     def run(self):
@@ -86,15 +86,19 @@ class Db_Controller(threading.Thread):
             size_q-=1
 
     def add_rows(self,gene_raw):
-        #if the gene is not yet in the db, then add that entry to set (set_genes)            
+        #if the gene is not yet in the db, then add that entry to set set_genes  ####or (len(self.set_genes[gene_raw[0]]) == 1 and not set_genes[gene_raw[0]][0] == gene_raw[0]) 
+         
+        #tup = (gene_raw[0],gene_raw[5])          
+        #if not tup in self.set_genes:
         if not gene_raw[0] in self.set_genes:
-             gene_id = gene_raw[0]
-             gene_sym = gene_raw[1]
-             self.set_genes.add(gene_id)
-             self.unexp_genes.append((gene_sym,gene_id))
-             self.add_row_GENES(gene_id,gene_sym)
-             self.add_row_GENES_INTER(gene_raw)
-        #if the gene is in, then check if the weight is greater than the others in db           
+            gene_id = gene_raw[0] 
+            gene_sym = gene_raw[1]
+            #self.set_genes.add(tup)
+            self.set_genes.add(gene_id)
+            self.unexp_genes.append((gene_sym,gene_id))
+            #en esta linea pongo la condicion si esta el gen registrado que ya no lo meta
+            self.add_row_GENES(gene_id,gene_sym)
+            self.add_row_GENES_INTER(gene_raw)
         else: #LO QUE PASA ES QUE SI ESTA EL GEN PERO NO ESTA EN EL SENTIDO QUE ESTA EN LA INTERACCION, SE TIENE QUE MODIFICAR ESTE MODULO O EL DE UPDATE_WEIGHT
             q1 = self.query_id(gene_raw[0])
             q2 = self.query_id(gene_raw[4])
@@ -116,9 +120,9 @@ class Db_Controller(threading.Thread):
         q1 = self.query_id(gene[0]) 
         q2 = self.query_id(gene[4])
         if gene[5] == '0':          
-            param2 = (q1,q2,gene[2])  
+            param2 = (q1[0],q2[0],gene[2])  
         else:
-            param2 = (q2,q1,gene[2])
+            param2 = (q2[0],q1[0],gene[2])
   
         self.con.execute(insert2,param2)
         self.con.commit()
