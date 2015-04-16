@@ -86,20 +86,21 @@ class Db_Controller(threading.Thread):
             size_q-=1
 
     def add_rows(self,gene_raw):
-        #if the gene is not yet in the db, then add that entry to set set_genes  ####or (len(self.set_genes[gene_raw[0]]) == 1 and not set_genes[gene_raw[0]][0] == gene_raw[0]) 
-         
-        #tup = (gene_raw[0],gene_raw[5])          
-        #if not tup in self.set_genes:
-        if not gene_raw[0] in self.set_genes:
-            gene_id = gene_raw[0] 
-            gene_sym = gene_raw[1]
-            #self.set_genes.add(tup)
-            self.set_genes.add(gene_id)
+        gene_id = gene_raw[0] 
+        gene_sym = gene_raw[1] 
+        tup = (gene_id,gene_raw[5])
+        print gene_raw          
+        if not tup in self.set_genes:
+        #if not gene_raw[0] in self.set_genes:
+            self.set_genes.add(tup)
+            #self.set_genes.add(gene_id)
             self.unexp_genes.append((gene_sym,gene_id))
-            #en esta linea pongo la condicion si esta el gen registrado que ya no lo meta
-            self.add_row_GENES(gene_id,gene_sym)
+            if not (gene_id,'0') or (gene_id,'1'):          
+                self.add_row_GENES(gene_id,gene_sym)
+                print "Meto en base a ", gene_id
+            #ES QUE NUNCA METO LA TUPLA Y POR ESO NO REGISTRA LAS OTRAS INTERACCIONES
             self.add_row_GENES_INTER(gene_raw)
-        else: #LO QUE PASA ES QUE SI ESTA EL GEN PERO NO ESTA EN EL SENTIDO QUE ESTA EN LA INTERACCION, SE TIENE QUE MODIFICAR ESTE MODULO O EL DE UPDATE_WEIGHT
+        else: 
             q1 = self.query_id(gene_raw[0])
             q2 = self.query_id(gene_raw[4])
             if not (q1 is None and q2 is None):
@@ -113,20 +114,6 @@ class Db_Controller(threading.Thread):
         self.con.execute(insert1,param1)
         self.con.commit() 
 
-    #Add a the new interaction to db
-    def add_row_GENES_INTER(self,gene):
-        #insert in second table
-        insert2 = "INSERT INTO GENES_INTER (ID, GENE1, GENE2, WEIGHT) VALUES (NULL,?,?,?);"
-        q1 = self.query_id(gene[0]) 
-        q2 = self.query_id(gene[4])
-        if gene[5] == '0':          
-            param2 = (q1[0],q2[0],gene[2])  
-        else:
-            param2 = (q2[0],q1[0],gene[2])
-  
-        self.con.execute(insert2,param2)
-        self.con.commit()
-
     #Make a query for the id in db with the gene name
     def query_id(self, gene):
         att = (gene,)
@@ -135,11 +122,24 @@ class Db_Controller(threading.Thread):
         data=self.cursor.fetchone()
         return data
 
+    #Add a the new interaction to db
+    def add_row_GENES_INTER(self,gene):
+        #insert in second table
+        insert2 = "INSERT INTO GENES_INTER (ID, GENE1, GENE2, WEIGHT) VALUES (NULL,?,?,?);"
+        q1 = self.query_id(gene[0])
+        q2 = self.query_id(gene[4])
+
+        param2 = (q1[0],q2[0],gene[2])
+        if gene[5] == '1': 
+            param2 = (q2[0],q1[0],gene[2])
+  
+        self.con.execute(insert2,param2)
+        self.con.commit()
+
     #Check the most high weight between all targets in/out, if the new weight is greater, change the weight with the new one
     def check_update(self,g_w,gene1,gene2,in_out):
-        if in_out == '0':   
-            att = (gene1,gene2)
-        else:
+        att = (gene1,gene2)        
+        if in_out == '1':   
             att = (gene2,gene1)
         query = "SELECT ID, WEIGHT FROM GENES_INTER WHERE GENE1 = ? AND GENE2 = ?;"
         self.cursor.execute(query, att) 
