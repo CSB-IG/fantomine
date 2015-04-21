@@ -29,9 +29,8 @@ class Db_Controller(threading.Thread):
         con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db', check_same_thread = False)
         return con
  
-    #Create the tables in the db, if they exists, then drop them
-    def create_tables(self):
-        print "create_tables"
+    #drop tables if exist in db
+    def drop(self):
         t1 = "GENES"
         t2 = "GENES_INTER"
         drop1 = "DROP TABLE IF EXISTS GENES;"
@@ -41,14 +40,26 @@ class Db_Controller(threading.Thread):
         self.cursor.execute(drop2)
         self.con.commit()
 
+    #create table GENES in db
+    def create_tgenes(self):
         table1 = "CREATE TABLE GENES (ID INTEGER PRIMARY KEY AUTOINCREMENT, GENE_ID TEXT NOT NULL,GENE_SYMBOL TEXT NOT NULL);"
         self.cursor.execute(table1)
         self.con.commit()
         print "Se creo la tabla GENES correctamente"
+
+    #create table GENES_INTER in db
+    def create_tgenes_inter(self):
         table2 = "CREATE TABLE GENES_INTER (ID INTEGER PRIMARY KEY AUTOINCREMENT, GENE1 INTEGER NOT NULL, GENE2 INTEGER NOT NULL, WEIGHT TEXT NOT NULL, FOREIGN KEY(GENE1) REFERENCES GENES(ID) ON DELETE CASCADE, FOREIGN KEY(GENE2) REFERENCES GENES(ID) ON DELETE CASCADE);"
         self.cursor.execute(table2)
         self.con.commit()
-        print "Se creo la tabla GENES_INTER correctamente"        
+        print "Se creo la tabla GENES_INTER correctamente"  
+    
+    #Create the tables in the db, if they exists, then drop them
+    def create_tables(self):
+        print "create_tables"
+        self.drop()
+        self.create_tgenes()
+        self.create_tgenes_inter()   
 
     def init_db(self):
         self.create_tables()
@@ -94,17 +105,14 @@ class Db_Controller(threading.Thread):
         #if not gene_raw[0] in self.set_genes:
             self.set_genes.add(tup)
             #self.set_genes.add(gene_id)
-            self.unexp_genes.append((gene_sym,gene_id))
-            if not (gene_id,'0') or (gene_id,'1'):          
-                self.add_row_GENES(gene_id,gene_sym)
-                print "Meto en base a ", gene_id
+            #if not (gene_id,'0') in self.set_genes or (gene_id,'1') in self.set_genes: 
+            self.unexp_genes.append((gene_sym,gene_id))         
+            self.add_row_GENES(gene_id,gene_sym)
+            print "Meto en base a ", gene_id
             #ES QUE NUNCA METO LA TUPLA Y POR ESO NO REGISTRA LAS OTRAS INTERACCIONES
             self.add_row_GENES_INTER(gene_raw)
         else: 
-            q1 = self.query_id(gene_raw[0])
-            q2 = self.query_id(gene_raw[4])
-            if not (q1 is None and q2 is None):
-                self.check_update(gene_raw[2],q1[0],q2[0],gene_raw[5])
+            self.check_inter(gene_raw)
 
     #Add a the new genes to db 
     def add_row_GENES(self,gene_id,gene_sym):
@@ -114,7 +122,7 @@ class Db_Controller(threading.Thread):
         self.con.execute(insert1,param1)
         self.con.commit() 
 
-    #Make a query for the id in db with the gene name
+    #Make a query in db for the id by gene name
     def query_id(self, gene):
         att = (gene,)
         query = "SELECT ID FROM GENES WHERE GENE_ID = ?;"
@@ -136,18 +144,26 @@ class Db_Controller(threading.Thread):
         self.con.execute(insert2,param2)
         self.con.commit()
 
-    #Check the most high weight between all targets in/out, if the new weight is greater, change the weight with the new one
-    def check_update(self,g_w,gene1,gene2,in_out):
+    #Make a query in db for the id by gene name
+    def query_weight(self,gene1,gene2,in_out):
         att = (gene1,gene2)        
         if in_out == '1':   
             att = (gene2,gene1)
         query = "SELECT ID, WEIGHT FROM GENES_INTER WHERE GENE1 = ? AND GENE2 = ?;"
         self.cursor.execute(query, att) 
         data=self.cursor.fetchone()
+
+    #Check the most high weight between all targets in/out, if the new weight is greater, 
+    #change the weight with the new one, if there is not that interaction, then is created
+    def check_inter(self,gene_raw):
+        q1 = self.query_id(gene_raw[0])
+        q2 = self.query_id(gene_raw[4])
+        data = self.query_weight(q1[0],q2[0],gene_raw[5])
         if data is None:
-	        print('There is no row with that genes')
+            print "se agrego una nueva interaccion"
+            self.add_row_GENES_INTER(gene_raw)
         else:
-            if float(g_w) < float(data[0]):
+            if float(gene_raw[2]) < float(data[0]):
                 print "update_weigt"
                 self.update_weight(data[0],data[1]) 
 
