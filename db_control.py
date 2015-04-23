@@ -4,7 +4,7 @@ import time
 
 class Db_Controller(threading.Thread):
 	
-    def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag, ft):
+    def __init__(self, threadID, TFBSQ, EXP_TFBSQ, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.TFBSQ = TFBSQ
@@ -12,7 +12,6 @@ class Db_Controller(threading.Thread):
         self.con= self.set_con_db()
         self.cursor = self.con.cursor()
         self.exit_flag = exitFlag
-        self.ft = ft
         self.unexp_genes = [] #explored genes list
         self.set_genes = set() #control dict
         print "acaba el init"
@@ -70,21 +69,17 @@ class Db_Controller(threading.Thread):
     def process_data(self):
         #first create tables 
         self.init_db()
-        while not self.exit_flag:
+        while self.exit_flag.qsize() == 0:
             #check first the EXP_TFBS queue to put TFBS in the DB
             if not self.EXP_TFBSQ.empty():
-		        print "paso por el primer if"
 		        self.add_TFBS2DB()
             else:
-                print "duermo 10 segundos"
                 time.sleep(10)
-                print "desperte!!!"
             #then put news TFBS to explore in TFBS
             self.get_new_targets()
             #if this condition is true then, the program had explored all genes in FANTOM4 edge db
             if self.TFBSQ.empty() and self.EXP_TFBSQ.empty():
-                print "SE ACABO ESTO"                
-                self.exit_flag = 1
+                self.exit_flag.put(1)
 
     #Add the gene and its interaction in the db 
     def add_TFBS2DB(self):
@@ -92,31 +87,24 @@ class Db_Controller(threading.Thread):
         print "size ",size_q
         while size_q > 0:
             gene_raw = self.EXP_TFBSQ.get()
-            #print "en add_TFBS2DB {0}".format(gene_raw)
+            print "en add_TFBS2DB {0}".format(gene_raw)
             self.add_rows(gene_raw)
             size_q-=1
 
     def add_rows(self,gene_raw):
         gene_id = gene_raw[0] 
         gene_sym = gene_raw[1] 
-        tup = (gene_id,gene_raw[5])
-        print gene_raw          
+        tup = (gene_id,gene_raw[5])        
         if not tup in self.set_genes:
-        #if not gene_raw[0] in self.set_genes:
             self.set_genes.add(tup)
-            #self.set_genes.add(gene_id)
-            #if not (gene_id,'0') in self.set_genes or (gene_id,'1') in self.set_genes: 
             self.unexp_genes.append((gene_sym,gene_id))         
             self.add_row_GENES(gene_id,gene_sym)
-            print "Meto en base a ", gene_id
-            #ES QUE NUNCA METO LA TUPLA Y POR ESO NO REGISTRA LAS OTRAS INTERACCIONES
             self.add_row_GENES_INTER(gene_raw)
         else: 
             self.check_inter(gene_raw)
 
     #Add a the new genes to db 
     def add_row_GENES(self,gene_id,gene_sym):
-        #insert in first table
         insert1 = "INSERT INTO GENES (ID, GENE_ID, GENE_SYMBOL) VALUES (NULL,?,?);"
         param1 = (gene_id,gene_sym)        
         self.con.execute(insert1,param1)
@@ -160,7 +148,6 @@ class Db_Controller(threading.Thread):
         q2 = self.query_id(gene_raw[4])
         data = self.query_weight(q1[0],q2[0],gene_raw[5])
         if data is None:
-            print "se agrego una nueva interaccion"
             self.add_row_GENES_INTER(gene_raw)
         else:
             if float(gene_raw[2]) < float(data[0]):
@@ -176,12 +163,11 @@ class Db_Controller(threading.Thread):
 
     #put all unxplore genes of unexp_genes list in EXP_TFBSQ queue for consumer threads
     def get_new_targets(self):
-        print "paso por new targets"
         if len(self.unexp_genes) == 0:
             print "esta vacio el queue"
         else:
             print "el tamano de la lista es ", len(self.unexp_genes)
-            print self.unexp_genes
+            #print self.unexp_genes
             for g in self.unexp_genes:
                 a = self.TFBSQ.put(g)
                 self.unexp_genes.remove(g)

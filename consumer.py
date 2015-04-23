@@ -22,13 +22,12 @@ class Url_Id_Consumer(threading.Thread):
 
     #Put the new TFBS in the ex_Q through exploring genes children in t_Q
     def process_genes(self, threadName, t_Q, ex_Q):
-        while not self.exitFlag: 
+        while self.exitFlag.qsize() == 0: 
             if not t_Q.empty():
                 id_gene = t_Q.get() 
                 #calling crawler
                 self.extract_data(threadName, id_gene, ex_Q)
             else:
-                #print "t_Q is empty\nthread {0} is sleeping".format(threadName) 
                 time.sleep(1)
 
     #search the genes in the xml pages of fantom db edge expression through http request 
@@ -45,8 +44,7 @@ class Url_Id_Consumer(threading.Thread):
 
 	#extract promoters of the next gene in the queue
     def extract_input_promoters(self, tree, ex_Q, id_g):
-        #INPUT PROMOTERS_FROM_EDGE
-        print "PROMOTERS_FROM_EDGE"
+        #print "PROMOTERS_FROM_EDGE"
         input_pro = tree.findall('promoters/promoter_from_edges')
         for i in input_pro:
             id_gene = i.findall('link_from')
@@ -58,8 +56,7 @@ class Url_Id_Consumer(threading.Thread):
     
     #extract targets of the next gene in the queue
     def extract_out_promoters(self, tree, ex_Q, id_g):
-        #OUTPUT PROMOTERS_TO_EDGE
-        print "\nPROMOTER TO EDGE"
+        #print "\nPROMOTER TO EDGE"
         output_pro = tree.findall('tfbs_predictions/link_to')
         for o in output_pro:
             tup2 = (o.attrib['feature_id'],o.attrib['name'],o.attrib['weight'],id_g[0],id_g[1],'1')
