@@ -1,7 +1,11 @@
 import sqlite3
+import sys
 
-#con = sqlite3.connect('/home/daniel/Desktop/trabajo/tesis_final/miscellaneous/genes.bd')
-con = sqlite3.connect('/home/daniel/Documents/fantom_db/genes.db')
+
+path = '/home/daniel/Documents/fantom_db/genes.db'
+if sys.argv[1] == 1:
+    path = '/home/daniel/Documents/fantom_db_respaldo/' +  str(sys.argv[2])
+con = sqlite3.connect(path)
 #con = sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
 #con esta opcion habilitamos el borrado en cascada
 con.execute("PRAGMA foreign_keys = ON")
@@ -39,12 +43,15 @@ con.commit()
 #Mostrar elementos de la primera tabla
 
 print "=======GENES======="
-cursor.execute("SELECT ID, GENE_ID, GENE_SYMBOL FROM GENES")
-data = cursor.fetchone()
-if data is None:
+cursor.execute("select MAX(ID) FROM GENES")
+m = cursor.fetchone()
+if m is None:
 	print "no hay nada"
-for i in cursor:
-	print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
+else:
+    print "El tamano de la tabla GENES es: {0}".format(m[0])
+    cursor.execute("SELECT ID, GENE_ID, GENE_SYMBOL FROM GENES")
+    for i in cursor:
+    	print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
 
 
 #para insertar en la segunda tabla
@@ -82,12 +89,15 @@ else:
 #mostrar elementos de la segunda tabla
 
 print "\n=======GENES_INTER======="
-cursor.execute("SELECT * FROM GENES_INTER")
-data  = cursor.fetchone()
-if data is None:
+cursor.execute("select MAX(ID) FROM GENES_INTER")
+m = cursor.fetchone()
+if m is None:
 	print "no hay nada"
-for i in cursor:
-	print "ID = ", i[0], "GENE1 = ", i[1], "GENE2 = ", i[2], "WEIGHT = ", i[3]
+else:
+    print "El tamano de la tabla GENES_INTER es: {0}".format(m[0])
+    cursor.execute("SELECT * FROM GENES_INTER")
+    for i in cursor:
+	    print "ID = ", i[0], "GENE1 = ", i[1], "GENE2 = ", i[2], "WEIGHT = ", i[3]
 
 
 #Mostrar la existencia de un registro 
