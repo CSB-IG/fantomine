@@ -24,7 +24,6 @@ def main():
     #a feature_id_gene for begin to explore
     TFBSQ.queue.append(('SRF','5558263'))
 
-    init = time.time()
     #enum the consumerthreads
     for i in range(MAX_NUM_T):
         threadList.append("Thread #"+str(i))
@@ -53,9 +52,7 @@ def main():
     for t in threads:
         t.join()
 
-    final = time.time()
     print "Exiting Main Thread, DATA MINING COMPLETE jeje"
-    print "El timpo total fue: {0} seg".format(init-final)
     	
 
 # cave canem

@@ -1,6 +1,7 @@
 from consumer import Url_Id_Consumer
 from db_control import Db_Controller
 import Queue
+import time
 
 
 
@@ -14,7 +15,7 @@ def main():
     #max number of threads
     MAX_NUM_T = 27
     #queue of new TFBS to explore
-    TFBSQ = Queue.Queue()
+    TFBSQ = Queue.LifoQueue()
     #queue of explored TFBS with interactions and weights
     EXP_TFBSQ = Queue.Queue()
     #exit flag for db_thread
@@ -52,7 +53,7 @@ def main():
     #Wait for all threads to complete
     for t in threads:
         t.join()
-
+    
     final = time.time()
     print "Exiting Main Thread, DATA MINING COMPLETE jeje"
     print "El timpo total fue: {0} seg".format(init-final)
