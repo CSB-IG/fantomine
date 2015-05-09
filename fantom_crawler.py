@@ -55,7 +55,7 @@ def main():
 
     final = time.time()
     print "Exiting Main Thread, DATA MINING COMPLETE jeje"
-    print "El timpo total fue: {0} seg".format(init-final)
+    print "El timpo total fue: {0} seg".format(final-init)
     	
 
 # cave canem

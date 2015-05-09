@@ -2,18 +2,11 @@ import sqlite3
 import sys
 
 
-path = "/home/daniel/Documents/"
-c = int(sys.argv[1])
-if c == 0:
-    path = ''.join([path,"fantom_db/genes.db"])
-elif c == 1:
-    path = ''.join([path,"fantom_db/respaldo/",str(sys.argv[2])])
-elif c == 2:
-    path = ''.join([path,"fantom_db_deep/genes.db"])
-elif c == 3:
-    path = ''.join([path,"fantom_db_deep/respaldo/",str(sys.argv[2])])
-
-print "path: {0}".format(path)
+path = '/home/daniel/Documents/fantom_db/genes.db'
+if sys.argv[1] == 1:
+    path = '/home/daniel/Documents/fantom_db_respaldo/' +  str(sys.argv[2])
+else if sys.argv[2] == 2:
+    path = '/home/daniel/Documents/fantom_db_deep/' +  str(sys.argv[2])
 con = sqlite3.connect(path)
 #con = sqlite3.connect('/Users/daniel/Desktop/INMEGEN/genes.bd')
 #con esta opcion habilitamos el borrado en cascada
@@ -60,7 +53,7 @@ else:
     print "El tamano de la tabla GENES es: {0}".format(m[0])
     cursor.execute("SELECT ID, GENE_ID, GENE_SYMBOL FROM GENES")
     for i in cursor:
-        print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
+    	print "ID = ", i[0], "GENE_ID = ", i[1], "GENE_SYMBOL = ", i[2]
 
 
 #para insertar en la segunda tabla
